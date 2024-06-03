@@ -12,6 +12,18 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    public function parameters() {
+        return $this->hasMany(Trip::class);
+    }
+
+    public function follows() {
+        return $this->hasMany(Follow::class);
+    }
+    
+    public function likes() {
+        return $this->hasMany(Like::class);
+    }
+
     /**
      * The attributes that are mass assignable.
      *
