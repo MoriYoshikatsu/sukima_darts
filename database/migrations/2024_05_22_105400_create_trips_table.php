@@ -18,8 +18,8 @@ return new class extends Migration
             $table->foreignId('parameter_id')->constrained()->onDelete('cascade');
             $table->string('title', 50);     // 旅行名
             $table->string('description', 200)->nullable();     // 詳細
-            $table->double('first_latitude');     // 最初のピン緯度
-            $table->double('first_longitude');     // 最初のピン経度
+            $table->double('dart_latitude');     // 最初のピン緯度
+            $table->double('dart_longitude');     // 最初のピン経度
             $table->date('trip_date')->nullable();     // 旅行日
             $table->integer('status');     // 0:非公開，1:公開
             $table->timestamps();

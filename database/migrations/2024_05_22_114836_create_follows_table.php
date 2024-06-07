@@ -15,8 +15,10 @@ return new class extends Migration
     {
         Schema::create('follows', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('follower_id')->constrained('users')->onDelete('cascade');        // フォローした人
-            $table->foreignId('followee_id')->constrained('users')->onDelete('cascade');        // フォローされた人
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');        // フォローした人
+            $table->foreignId('follow_id')->constrained('users')->onDelete('cascade');        // フォローされた人
+            //user_idとfollow_idの重複する組み合わせは許さない
+            $table->unique(['user_id', 'follow_id']);
             $table->timestamps();
         });
     }

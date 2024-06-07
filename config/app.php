@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Facade;
 
 return [
+    
+    'google_key' => env('MAP_API'),
 
     /*
     |--------------------------------------------------------------------------

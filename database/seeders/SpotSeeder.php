@@ -15,6 +15,6 @@ class SpotSeeder extends Seeder
      */
     public function run()
     {
-        Spot::factory()->count(10)->create();
+        Spot::factory()->count(3)->create();
     }
 }

@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('spots', function (Blueprint $table) {
             $table->id();
             $table->foreignId('spot_category_id')->constrained()->onDelete('cascade');
-            $table->string('name', 30);     // 場所名
+            $table->string('name');     // 場所名
             $table->double('latitude');     // 緯度
             $table->double('longitude');     // 経度
             $table->timestamps();

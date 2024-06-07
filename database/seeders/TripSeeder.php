@@ -15,6 +15,5 @@ class TripSeeder extends Seeder
      */
     public function run()
     {
-        Trip::factory()->count(10)->create();
     }
 }

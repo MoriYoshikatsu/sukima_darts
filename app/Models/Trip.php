@@ -26,12 +26,10 @@ class Trip extends Model
     }
     
     protected $fillable = [
-        'user_id',
         'title',
         'description',
-        'first_point',
-        'frst_latitude',
-        'first_longitude',
+        'dart_latitude',
+        'dart_longitude',
         'trip_date',
         'status',
         'created_at',
