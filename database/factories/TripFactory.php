@@ -19,9 +19,9 @@ class TripFactory extends Factory
         return [
             'parameter_id' => 1,
             'title' => fake()->word,
-            'description' => fake()->realText(),
-            'first_latitude' => fake()-> randomFloat(2, 30, 40),
-            'first_longitude' => fake()-> randomFloat(2, 130, 140),
+            // 'description' => fake()->realText(),
+            'dart_latitude' => fake()-> randomFloat(2, 30, 40),
+            'dart_longitude' => fake()-> randomFloat(2, 130, 140),
             'trip_date' => fake()-> date(),
             'status' => 0,
             'created_at' => now(),

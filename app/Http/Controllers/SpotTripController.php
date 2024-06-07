@@ -27,7 +27,7 @@ class SpotTripController extends Controller
         $trip = Trip::where('parameter_id', $parameter->id)->latest("updated_at")->first();
         $spotTrips = SpotTrip::where('trip_id', $trip->id)->get();
         
-        return view("trip.list")->with(["spotTrips" => $spotTrips, "trip" => $trip]);
+        return view("trip.list")->with(["spotTrips" => $spotTrips, "trip" => $trip, "parameter" => $parameter]);
     }
 
     // spot_tripで行ったかどうかを更新

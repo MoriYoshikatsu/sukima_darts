@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Follow;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class FollowController extends Controller
@@ -44,10 +45,17 @@ class FollowController extends Controller
      * @param  \App\Models\Follow  $follow
      * @return \Illuminate\Http\Response
      */
-    public function show(Follow $follow)
+    public function show_follower(Follow $follow)
     {
-        //
+        $followers = Follow::where('follower_id', Auth::id())->get();
+        return view('like')->with(["followers" => $followers]);
     }
+    
+    // public function show_followee(Follow $follow)
+    // {
+    //     $followees = Follow::where('followee_id', Auth::id())->get();
+    //     return view('like')->with(["followees" => $followees]);
+    // }
 
     /**
      * Show the form for editing the specified resource.

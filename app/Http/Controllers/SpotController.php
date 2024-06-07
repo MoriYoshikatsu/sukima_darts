@@ -61,8 +61,8 @@ class SpotController extends Controller
         $trip->parameter_id = $request['parameter_id'];
         $trip->title = "タイトル";
         $trip->description = "詳細";
-        $trip->first_latitude = $request['first_latitude'];
-        $trip->first_longitude = $request['first_longitude'];
+        $trip->dart_latitude = $request['dart_latitude'];
+        $trip->dart_longitude = $request['dart_longitude'];
         $trip->trip_date = now();
         $trip->status = 0;
         $trip->save();

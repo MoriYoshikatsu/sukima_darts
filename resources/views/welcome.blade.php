@@ -27,13 +27,13 @@
         <div class="flex justify-end">
           <div class="bg-white p-2 mx-4 my-2 w-1/4">
             <h1 class="text-lg font-bold">テストユーザー</h1>
-            <div class="text-center">test01</div>
+            <div class="text-center">test1</div>
             <h1 class="text-lg font-bold">メールアドレス</h1>
-            <div class="text-center">test01@mail.com</div>
+            <div class="text-center">test1@gmail.com</div>
             <h1 class="text-lg font-bold">パスワード</h1>
-            <div class="text-center">test01test01</div>
+            <div class="text-center">test1</div>
             <div class="text-end">
-              <a class="font-bold" href="/login">ログインへ</a>
+              <a class="font-bold" href="/users/{user}/trip/index">ログインへ</a>
             </div>
           </div>
         </div>
