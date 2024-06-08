@@ -2,92 +2,102 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Follow;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class FollowController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
+	public function followee_index()
+	{
+		$followees_id = Follow::where('user_id', Auth::id())->pluck('follow_id'); // IDのリストを取得
+		$followees = User::whereIn('id', $followees_id)->get(); // 取得したIDリストを使ってユーザーを取得
+		$target_users = collect(); // 空のコレクションを初期化
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
+		return view('followee')->with(['followees' => $followees, 'target_users' => $target_users]);
+	}
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Follow  $follow
-     * @return \Illuminate\Http\Response
-     */
-    public function show_follower(Follow $follow)
-    {
-        $followers = Follow::where('follower_id', Auth::id())->get();
-        return view('like')->with(["followers" => $followers]);
-    }
-    
-    // public function show_followee(Follow $follow)
-    // {
-    //     $followees = Follow::where('followee_id', Auth::id())->get();
-    //     return view('like')->with(["followees" => $followees]);
-    // }
+	public function followee_search(Request $request)
+	{
+		// 検索キーワードを取得
+		$search = $request->input('search');
+		$target_users = User::where('name', 'like', '%' . $search . '%')->where('id', '!=', Auth::id())->get();
+		
+		$followees_id = Follow::where('user_id', Auth::id())->pluck('follow_id');
+		$followees = User::whereIn('id', $followees_id)->get();
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Follow  $follow
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Follow $follow)
-    {
-        //
-    }
+		return view('followee')->with(['target_users' => $target_users, 'followees' => $followees]);
+	}
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Follow  $follow
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Follow $follow)
-    {
-        //
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Follow  $follow
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Follow $follow)
-    {
-        //
-    }
+	public function followee_update(Request $request)
+	{
+		$follow_id = $request->follow_id;
+		//ログインユーザーが対象のユーザーをフォローしているか？ 
+		$isFollow = (boolean) Follow::where('user_id', Auth::user()->id)->where('follow_id', $follow_id)->first();
+		if($isFollow){
+			$unfollow = Follow::where('user_id', Auth::user()->id)->where('follow_id', $follow_id);
+			$unfollow->delete();
+		}else{
+			$follow = new follow();
+			$follow->user_id = Auth::user()->id;
+			$follow->follow_id = $follow_id;
+			$follow->save();
+		}
+		
+		$followees_id = Follow::where('user_id', Auth::id())->pluck('follow_id'); // IDのリストを取得
+		$followees = User::whereIn('id', $followees_id)->get(); // 取得したIDリストを使ってユーザーを取得
+		$target_users = collect(); // 空のコレクションを初期化
+	
+		return view('followee')->with(['followees' => $followees, 'target_users' => $target_users]);
+	}
+	
+	
+	
+	public function follower_index()
+	{
+		$followers_id = Follow::where('follow_id', Auth::id())->pluck('user_id'); // IDのリストを取得
+		$followers = User::whereIn('id', $followers_id)->get(); // 取得したIDリストを使ってユーザーを取得
+		$target_users = collect(); // 空のコレクションを初期化
+
+		return view('follower')->with(['followers' => $followers, 'target_users' => $target_users]);
+	}
+
+
+	public function follower_search(Request $request)
+	{
+		// 検索キーワードを取得
+		$search = $request->input('search');
+		$target_users = User::where('name', 'like', '%' . $search . '%')->where('id', '!=', Auth::id())->get();
+		
+		$followers_id = Follow::where('follow_id', Auth::id())->pluck('user_id');
+		$followers = User::whereIn('id', $followers_id)->get();
+
+		return view('follower')->with(['target_users' => $target_users, 'followers' => $followers]);
+	}
+
+	public function follower_update(Request $request)
+	{
+		$follow_id = $request->follow_id;
+		//ログインユーザーが対象のユーザーをフォローしているか？ 
+		$isFollow = (boolean) Follow::where('user_id', Auth::user()->id)->where('follow_id', $follow_id)->first();
+		if($isFollow){
+			$unfollow = Follow::where('user_id', Auth::user()->id)->where('follow_id', $follow_id);
+			$unfollow->delete();
+		}else{
+			$follow = new follow();
+			$follow->user_id = Auth::user()->id;
+			$follow->follow_id = $follow_id;
+			$follow->save();
+		}
+		
+		$followers_id = Follow::where('follow_id', Auth::id())->pluck('user_id'); // IDのリストを取得
+		$followers = User::whereIn('id', $followers_id)->get(); // 取得したIDリストを使ってユーザーを取得
+		$target_users = collect(); // 空のコレクションを初期化
+	
+		return view('follower')->with(['followers' => $followers, 'target_users' => $target_users]);
+	}
+
 }

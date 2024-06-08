@@ -1,63 +1,68 @@
 <x-app-layout>
-    <x-slot name="title">ダーツの条件入力</x-slot>
+	<x-slot name="title">ダーツの条件入力</x-slot>
 
-    <!-- Google Maps API の読み込み -->
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ config('app.google_key') }}&libraries=places"></script>
+	<!-- Google Maps API の読み込み -->
+	<script src="https://maps.googleapis.com/maps/api/js?key={{ config('app.google_key') }}&libraries=places"></script>
 
-    <div class="px-auto">
-        <form action="/users/{{ Auth::id() }}/trip/input" method="POST">
-            @method('post')
-            @csrf
-            <input type="hidden" name="parameter[user_id]" value="{{ Auth::id() }}"/>
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <!-- 移動手段の選択 -->
-                <div>
-                    <label for="transportation">移動手段を選択:</label>
-                    <select name="parameter[transportation]">
-                        <option value="徒歩">徒歩</option>
-                        <option value="自転車">自転車</option>
-                        <option value="車">車</option>
-                    </select>
+	<div class="bg-gray-100 min-h-screen px-4 py-6 sm:px-6 lg:px-8">
+		<form action="/users/{{ Auth::id() }}/trip/input" method="POST" class="space-y-6">
+			@method('post')
+			@csrf
+			<input type="hidden" name="parameter[user_id]" value="{{ Auth::id() }}"/>
+			<div class="max-w-7xl mx-auto space-y-6">
+				<!-- 移動手段の選択 -->
+				<div class="space-y-2">
+					<label for="transportation" class="block text-sm font-medium text-gray-700">移動手段を選択:</label>
+					<select name="parameter[transportation]" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+						<option value="徒歩">徒歩</option>
+						<option value="自転車">自転車</option>
+						<option value="車">車</option>
+					</select>
+				</div>
+	
+				<!-- 移動可能時間の選択 -->
+				<div class="space-y-2">
+					<label for="trip_time" class="block text-sm font-medium text-gray-700">移動可能時間を選択:</label>
+					<select name="parameter[trip_time]" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+						@for ($i = 15; $i <= 720; $i += 15)
+							<option value="{{ $i }}">{{ intdiv($i, 60) }}時間{{ $i % 60 }}分</option>
+						@endfor
+					</select>
+				</div>
+	
+				<!-- 行きたい場所のタグの選択 -->
+				<div class="space-y-2">
+					<label for="spot_category" class="block text-sm font-medium text-gray-700">行きたい場所のタグを選択:</label>
+					<select name="parameter[spot_category_id]" id="spot_category" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+						@foreach ($spot_categories as $spot_category)
+							<option value="{{ $spot_category->id }}">{{ $spot_category->ja_name }}</option>
+						@endforeach
+					</select>
+				</div>
+	
+				<!-- 出発地の選択 -->
+				<div class="space-y-2">
+					<label for="departure_location" class="block text-sm font-medium text-gray-700">出発地を選択:</label>
+					<div id="map" style="height: 400px; width:1200px; rounded-md shadow-sm"></div>
+					<input type="hidden" name="parameter[departure_latitude]" id="departure_latitude">
+					<input type="hidden" name="parameter[departure_longitude]" id="departure_longitude">
+					<input id="address" type="text" name="post[address]" placeholder="出発地" value="" class="mt-2 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"/>
+					<p class="text-red-500 text-sm mt-1">{{ $errors->first('address') }}</p>
+				</div>
+	
+				<div class="flex justify-end">
+                    <button type="submit" class="relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-medium text-white transition duration-300 ease-out bg-blue-600 rounded-md shadow-lg group hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <span class="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-500 to-blue-600"></span>
+                        <span class="relative">この条件でダーツを投げる</span>
+                    </button>
                 </div>
-    
-                <!-- 移動可能時間の選択 -->
-                <div>
-                    <label for="trip_time">移動可能時間を選択:</label>
-                    <select name="parameter[trip_time]">
-                        @for ($i = 15; $i <= 720; $i += 15)
-                            <option value="{{ $i }}">{{ intdiv($i, 60) }}時間{{ $i % 60 }}分</option>
-                        @endfor
-                    </select>
-                </div>
-    
-                <!-- 行きたい場所のタグの選択 -->
-                <div>
-                    <label for="spot_category">行きたい場所のタグを選択:</label>
-                    <select name="parameter[spot_category_id]" id="spot_category">
-                        @foreach ($spot_categories as $spot_category)
-                            <option value="{{ $spot_category->id }}">{{ $spot_category->ja_name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-    
-                <!-- 出発地の選択 -->
-                <div>
-                    <label for="departure_location">出発地を選択:</label>
-                    <div id="map" style="height: 400px; width:1200px;"></div>
-                    <input type="hidden" name="parameter[departure_latitude]" id="departure_latitude">
-                    <input type="hidden" name="parameter[departure_longitude]" id="departure_longitude">
-                    <input id="address" type="text" name="post[address]" placeholder="出発地" value=""/>
-    				<p class="title__error" style="color:red">{{ $errors->first('address') }}</p>
-                </div>
-    
-                <input type="submit" value="この条件でダーツを投げる">
-            </div>
-        </form>
-    </div>
+			</div>
+		</form>
+	</div>
 
-    <!-- Google Maps JavaScript -->
-    <script>
-        let map;
+	<!-- Google Maps JavaScript -->
+	<script>
+		let map;
 		let marker;
 		
 		function initMap(position) {	// Google Maps API を使用して地図を初期化する関数

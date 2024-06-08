@@ -21,6 +21,32 @@ class TripController extends Controller
 		$trips = Trip::all();
 		$userParameters = Parameter::where('user_id', Auth::id())->get();
 		$filteredTrips = collect();
+		$tripSpotTrips = [];
+		$tripWentSpotTrips = [];
+		
+		foreach ($trips as $trip) {
+			foreach ($userParameters as $parameter) {
+				if ($trip->parameter_id === $parameter->id) {
+					$filteredTrips->push($trip);
+					
+					$tripSpotTrips[$trip->id] = SpotTrip::where('trip_id', $trip->id)->where('status', 0)->get();
+					$tripWentSpotTrips[$trip->id] = SpotTrip::where('trip_id', $trip->id)->where('status', 1)->get();
+				}
+			}
+		}
+		return view('trip.index')->with(['trips' => $filteredTrips, "tripWentSpotTrips" => $tripWentSpotTrips, "tripSpotTrips" => $tripSpotTrips]);
+	}
+
+	/**
+	 * Show the form for creating a new resource.
+	 *
+	 * @return \Illuminate\Http\Response
+	 */
+	public function create(Request $request)
+	{
+		$trips = Trip::all();
+		$userParameters = Parameter::where('user_id', Auth::id())->get();
+		$filteredTrips = collect();
 		foreach ($trips as $trip) {
 			foreach ($userParameters as $parameter) {
 				if ($trip->parameter_id === $parameter->id) {
@@ -30,28 +56,11 @@ class TripController extends Controller
 		}
 
 		$tripId = $request->route('trip');
-		// $trip = Trip::where('parameter_id', $userParameters->id)->where('id', $tripId)->first();
 		$trip = $filteredTrips->where('id', $tripId)->sortByDesc("updated_at")->first();
-		// dd($trip);
 		$SpotTrips = SpotTrip::where('trip_id', $trip->id)->where('status', 0)->get();
 		$wentSpotTrips = SpotTrip::where('trip_id', $trip->id)->where('status', 1)->get();
 	
-		return view('trip.user')->with(['trips' => $filteredTrips, "trip" => $trip, "wentSpotTrips" => $wentSpotTrips, "SpotTrips" => $SpotTrips]);
-	}
-
-	/**
-	 * Show the form for creating a new resource.
-	 *
-	 * @return \Illuminate\Http\Response
-	 */
-	public function create()
-	{
-		$parameter = Parameter::where('user_id', Auth::id())->latest("updated_at")->first();
-		$trip = Trip::where('parameter_id', $parameter->id)->latest("updated_at")->first();
-		$SpotTrips = SpotTrip::where('trip_id', $trip->id)->where('status', 0)->get();
-		$wentSpotTrips = SpotTrip::where('trip_id', $trip->id)->where('status', 1)->get();
-		
-		return view("trip.create")->with(["trip" => $trip, "wentSpotTrips" => $wentSpotTrips, "SpotTrips" => $SpotTrips]);
+		return view('trip.create')->with(['trips' => $filteredTrips, "trip" => $trip, "wentSpotTrips" => $wentSpotTrips, "SpotTrips" => $SpotTrips]);
 	}
 
 	/**
@@ -67,14 +76,26 @@ class TripController extends Controller
 		$trip->parameter_id = $parameter->id;
 		$trip->title = $request->title;
 		$trip->description = $request->description;
-		$trip->dart_latitude = $request->dart_latitude;
-		$trip->dart_longitude = $request->dart_longitude;
 		$trip->trip_date = $request->trip_date;
 		$trip->status = $request->status;
-	
 		$trip->save();
-	
-		return redirect()->route('show_trip', ['user' => Auth::id(), 'trip' => $trip]);
+		
+		$spotIds = $request['spots'];
+		if ($spotIds !== null) {
+			foreach($spotIds as $spotId) {
+				$spotTrip = SpotTrip::where('spot_id', $spotId)->first();
+				if ($spotTrip->status === 0) {
+					$spotTrip->status = 1;
+				} else {
+					$spotTrip->status = 0;
+				}
+				$spotTrip->save();
+				
+				$tripId = $spotTrip->trip_id;
+			}
+		}
+		
+		return redirect()->route('index_trip', ['user' => Auth::id()]);
 	}
 
 	/**
@@ -85,8 +106,7 @@ class TripController extends Controller
 	 */
 	public function show(Trip $trips)
 	{
-		$trips = Trip::all();
-		return view("trip.user")->with(["trips" => $trips]);
+		
 	}
 
 	/**
@@ -95,9 +115,27 @@ class TripController extends Controller
 	 * @param  \App\Models\Trip  $trip
 	 * @return \Illuminate\Http\Response
 	 */
-	public function edit(Trip $trip)
+	public function edit(Request $request)
 	{
-		//
+		$trips = Trip::all();
+		$userParameters = Parameter::where('user_id', Auth::id())->get();
+		$filteredTrips = collect();
+		foreach ($trips as $trip) {
+			foreach ($userParameters as $parameter) {
+				if ($trip->parameter_id === $parameter->id) {
+					$filteredTrips->push($trip);
+				}
+			}
+		}
+
+		$tripId = $request->route('trip');
+		// $trip = Trip::where('parameter_id', $userParameters->id)->where('id', $tripId)->first();
+		$trip = $filteredTrips->where('id', $tripId)->sortByDesc("updated_at")->first();
+		// dd($trip);
+		$SpotTrips = SpotTrip::where('trip_id', $trip->id)->get();
+		// $wentSpotTrips = SpotTrip::where('trip_id', $trip->id)->where('status', 1)->get();
+	
+		return view('trip.edit')->with(['trips' => $filteredTrips, "trip" => $trip, "SpotTrips" => $SpotTrips]);
 	}
 
 	/**
@@ -107,9 +145,35 @@ class TripController extends Controller
 	 * @param  \App\Models\Trip  $trip
 	 * @return \Illuminate\Http\Response
 	 */
-	public function update(Request $request, Trip $trip)
+	public function update(Request $request)
 	{
-		//
+		$tripId = $request->route('trip');
+		
+		$trip = Trip::where('id', $tripId)->latest("updated_at")->first();
+		$trip->title = $request->title;
+		$trip->description = $request->description;
+		$trip->trip_date = $request->trip_date;
+		$trip->status = $request->status;
+		$trip->save();
+		
+		
+		$spotIds = $request['spots'];
+		
+		if ($spotIds !== null) {
+			foreach($spotIds as $spotId) {
+				$spotTrip = SpotTrip::where('spot_id', $spotId)->first();
+				if ($spotTrip->status === 0) {
+					$spotTrip->status = 1;
+				} else {
+					$spotTrip->status = 0;
+				}
+				$spotTrip->save();
+				
+				$tripId = $spotTrip->trip_id;
+			}
+		}
+		
+		return redirect('/users/' . Auth::id());
 	}
 
 	/**

@@ -1,6 +1,6 @@
 <x-app-layout>
 	<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('app.google_key') }}&libraries=streetView&callback=initMap&v=weekly"></script>
-	<x-slot name="title">{{ $trip->title }}の投稿</x-slot>
+	<x-slot name="title">{{ $trip->title }}の編集</x-slot>
 	<div class="container mx-auto p-4">
 		<div class="flex justify-between items-center border-b pb-2">
 			<div class="text-xl font-bold">User名</div>
@@ -44,8 +44,9 @@
 					<div id="map" style="height: 500px; width: 100%;"></div>
 				</div>
 
-				<form method="POST" action="/store/trip">
+				<form method="POST" action="/users/{{ Auth::id() }}/put/trip/{{ $trip->id }}">
 					@csrf
+					@method('PUT')
 					<div class="flex justify">
 						<!-- Spot List -->
 						<div class="w-1/5 border-r pr-4">
@@ -99,7 +100,7 @@
 							<br>
 							<button type="submit" class="relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-medium text-white transition duration-300 ease-out bg-blue-600 rounded-md shadow-lg group hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
 								<span class="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-500 to-blue-600"></span>
-								<span class="relative">投稿</span>
+								<span class="relative">編集完了</span>
 							</button>
 							<div class="mt-4 border-t pt-2">
 								<h4 class="text-md font-bold">読者からのコメント及び5つ星評価</h4>
@@ -109,11 +110,12 @@
 					</div>
 				</form>
 				
+			</div>
 		</div>
 	</div>
 
 
-		<script>
+	<script>
 		let infoWindow;
 		let marker;
 		const dartLocation = { lat: {{ $trip->dart_latitude }}, lng: {{ $trip->dart_longitude }} };
