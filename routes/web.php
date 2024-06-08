@@ -35,17 +35,30 @@ Route::middleware('auth')->group(function () {
 	Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 Route::middleware('auth')->group(function () {
-	Route::get('/users/{user}/trip/index', [ParameterController::class, 'index'])->name('dart.index');
-	Route::post('/users/{user}/trip/input', [ParameterController::class, 'post_parameter'])->name('post_parameter');
-	Route::get('/users/{user}/trip/darts', [ParameterController::class, 'show_darts'])->name('show_darts');
-	Route::post('/users/{user}/trip/list', [SpotController::class, 'create_spots'])->name('create_spots');
-	Route::get('/create/users/{user}/trip/list', [SpotTripController::class, 'create'])->name('create_list');
-	Route::post('/store/spot_trip/status', [SpotTripController::class, 'store_status'])->name('store_status');
-	Route::get('/users/{user}/create/trip/{trip}', [TripController::class, 'create'])->name('create_trip');
-	Route::post('/store/trip', [TripController::class, 'store'])->name('store_trip');
-	Route::get('/users/{user}/trip/{trip}', [TripController::class, 'index'])->name('show_trip');
-	Route::get('/users/{user}/trip/{trip}/index',[UserController::class,'index'])->name('users.index');
-	Route::post('/users/{user}/trip/{trip}/follow',[UserController::class,'follow'])->name('users.follow');
+	Route::controller(ParameterController::class)->group(function(){
+		Route::get('/users/{user}/trip/index', 'index')->name('index_dart');
+		Route::post('/users/{user}/trip/input', 'post_parameter')->name('post_parameter');
+		Route::get('/users/{user}/trip/darts', 'show_darts')->name('show_darts');
+		Route::post('/users/{user}/trip/list', 'create_spots')->name('create_spots');
+	});
+	
+	Route::controller(TripController::class)->group(function(){
+		Route::get('/users/{user}/create/trip/{trip}', 'create')->name('create_trip');
+		Route::post('/store/trip', 'store')->name('store_trip');
+		Route::get('/users/{user}','index')->name('index_trip');
+		Route::get('/users/{user}/edit/trip/{trip}', 'edit')->name('edit_trip');
+		Route::put('/users/{user}/put/trip/{trip}', 'update')->name('update_trip');
+		// Route::get('/users/{user}/create/trip/{trip}', 'create')->name('create_trip');
+	});
+	
+	Route::controller(FollowController::class)->group(function(){
+		Route::get('/users/{user}/followee/index',[FollowController::class,'followee_index'])->name('followee_index');
+		Route::post('/users/{user}/followee/search', [FollowController::class, 'followee_search'])->name('followee_search');
+		Route::post('/users/{user}/followee/update',[FollowController::class,'followee_update'])->name('followee_update');
+		Route::get('/users/{user}/follower/index',[FollowController::class,'follower_index'])->name('follower_index');
+		Route::post('/users/{user}/follower/search', [FollowController::class, 'follower_search'])->name('follower_search');
+		Route::post('/users/{user}/follower/update',[FollowController::class,'follower_update'])->name('follower_update');
+	});
 });
 
 
