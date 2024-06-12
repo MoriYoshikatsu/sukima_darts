@@ -1,13 +1,14 @@
 <x-app-layout>
+	<x-slot name="title">{{ Auth::user()->name }}のフォロー</x-slot>
+	
 	<div class="container mx-auto p-4">
 		<form method="POST" action="/users/{{ Auth::id() }}/followee/search" class="mb-4">
 			@csrf
 			<div class="flex mb-4">
 				<input type="text" name="search" placeholder="ユーザー名検索" value="{{ request('search') }}" class="w-1/2 p-2 border mr-4">
-				<input type="text" placeholder="タグor日付ソートボックス" class="w-1/2 p-2 border">
-			</div>
-			<div class="text-right">
-				<button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded">検索</button>
+				<div class="text-right">
+					<button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded">検索</button>
+				</div>
 			</div>
 		</form>
 
@@ -17,7 +18,7 @@
 				@foreach ($target_users as $target_user)
 					<div class="flex items-center border p-4 bg-white rounded-md shadow-sm">
 						<div class="w-3/4">
-							<h2 class="text-lg font-bold mb-1">{{ $target_user->name }}</h2>
+							<a href='/users/{{ $target_user->id }}/others' class="text-lg font-bold mb-1">{{ $target_user->name }}</a>
 							<p class="text-sm text-gray-600">初期ランダムピン地点名</p>
 							<p class="text-sm text-gray-600">行ったスポットのタグカテゴリー</p>
 						</div>
@@ -51,7 +52,7 @@
 			@foreach ($followees as $followee)
 				<div class="flex items-center border p-4 bg-white rounded-md shadow-sm">
 					<div class="w-3/4">
-						<h2 class="text-lg font-bold mb-1">{{ $followee->name }}</h2>
+						<a href='/users/{{ $followee->id }}/others' class="text-lg font-bold mb-1">{{ $followee->name }}</a>
 						<p class="text-sm text-gray-600">初期ランダムピン地点名</p>
 						<p class="text-sm text-gray-600">行ったスポットのタグカテゴリー</p>
 					</div>

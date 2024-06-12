@@ -1,10 +1,7 @@
 <x-app-layout>
 	<x-slot name="title">ダーツの条件入力</x-slot>
 
-	<!-- Google Maps API の読み込み -->
-	<script src="https://maps.googleapis.com/maps/api/js?key={{ config('app.google_key') }}&libraries=places"></script>
-
-	<div class="bg-gray-100 min-h-screen px-4 py-6 sm:px-6 lg:px-8">
+	<div class="container mx-auto p-4">
 		<form action="/users/{{ Auth::id() }}/trip/input" method="POST" class="space-y-6">
 			@method('post')
 			@csrf
@@ -43,7 +40,10 @@
 				<!-- 出発地の選択 -->
 				<div class="space-y-2">
 					<label for="departure_location" class="block text-sm font-medium text-gray-700">出発地を選択:</label>
-					<div id="map" style="height: 400px; width:1200px; rounded-md shadow-sm"></div>
+					<div class="items-center border p-4 bg-white rounded-md shadow-sm mb-4">
+						<!--<div id="map" style="height: 80%; width:80%; rounded-md shadow-sm"></div>-->
+						<div id="map" class="map" style="height: 500px; width: 100%;"></div>
+					</div>
 					<input type="hidden" name="parameter[departure_latitude]" id="departure_latitude">
 					<input type="hidden" name="parameter[departure_longitude]" id="departure_longitude">
 					<input id="address" type="text" name="post[address]" placeholder="出発地" value="" class="mt-2 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"/>
@@ -51,11 +51,11 @@
 				</div>
 	
 				<div class="flex justify-end">
-                    <button type="submit" class="relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-medium text-white transition duration-300 ease-out bg-blue-600 rounded-md shadow-lg group hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        <span class="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-500 to-blue-600"></span>
-                        <span class="relative">この条件でダーツを投げる</span>
-                    </button>
-                </div>
+	                <button type="submit" class="relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-medium text-white transition duration-300 ease-out bg-blue-600 rounded-md shadow-lg group hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+	                    <span class="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-500 to-blue-600"></span>
+	                    <span class="relative">この条件でダーツを投げる</span>
+	                </button>
+	            </div>
 			</div>
 		</form>
 	</div>
@@ -129,7 +129,5 @@
 		}
 		
 	</script>
-	<script async defer
-	src="https://maps.googleapis.com/maps/api/js?key={{ config('app.google_key') }}&callback=initMap&libraries=places">
-	</script>
+	<script async defer	src="https://maps.googleapis.com/maps/api/js?key={{ config('app.google_key') }}&callback=initMap&libraries=places"></script>
 </x-app-layout>

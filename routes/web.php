@@ -34,6 +34,8 @@ Route::middleware('auth')->group(function () {
 	Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 	Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+
 Route::middleware('auth')->group(function () {
 	Route::controller(ParameterController::class)->group(function(){
 		Route::get('/users/{user}/trip/index', 'index')->name('index_dart');
@@ -46,6 +48,7 @@ Route::middleware('auth')->group(function () {
 		Route::get('/users/{user}/create/trip/{trip}', 'create')->name('create_trip');
 		Route::post('/store/trip', 'store')->name('store_trip');
 		Route::get('/users/{user}','index')->name('index_trip');
+		Route::get('/users/{user}/others','others_index')->name('others_index_trip');
 		Route::get('/users/{user}/edit/trip/{trip}', 'edit')->name('edit_trip');
 		Route::put('/users/{user}/put/trip/{trip}', 'update')->name('update_trip');
 		// Route::get('/users/{user}/create/trip/{trip}', 'create')->name('create_trip');

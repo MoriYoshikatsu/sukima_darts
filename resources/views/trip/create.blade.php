@@ -1,54 +1,41 @@
 <x-app-layout>
-	<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('app.google_key') }}&libraries=streetView&callback=initMap&v=weekly"></script>
-	<x-slot name="title">{{ $trip->title }}の投稿</x-slot>
+	<x-slot name="title">{{ Auth::user()->name }}の{{ $trip->title }}</x-slot>
+	
 	<div class="container mx-auto p-4">
 		<div class="flex justify-between items-center border-b pb-2">
-			<div class="text-xl font-bold">User名</div>
+			<div class="text-xl font-bold">{{ Auth::user()->name }}</div>
 			<div class="mt-4">
-				<p class="text-lg">自己紹介文</p>
+				<p class="text-lg">{{ Auth::user()->introduce }}</p>
 			</div>
 		</div>
 		
 		<div class="flex mt-4">
 			<!-- Sidebar -->
 			<div class="w-1/5 border-r pr-4">
-				<div class="mb-4">
-					<input type="text" placeholder="トリップリスト検索ボックス" class="w-full p-2 border">
-				</div>
-				<div class="mb-4">
-					<input type="text" placeholder="トリップリストソートボックス" class="w-full p-2 border">
-				</div>
+				<h2 class="text-2xl font-bold mb-4">{{ Auth::user()->name }}の旅行先</h2>
 				<ul>
 					@foreach($trips as $tripz)
-						@if($tripz->status == 1)
-							<div>
-								<a href="/users/{{ Auth::id() }}/edit/trip/{{ $tripz->id }}">{{ $tripz->title }}</a>
-							</div>
-						@endif
+						<div>
+							<a href="/users/{{ Auth::id() }}/edit/trip/{{ $tripz->id }}">{{ $tripz->title }}</a>
+						</div>
 					@endforeach
 				</ul>
 			</div>
 		
 			<!-- Main Content -->
 			<div class="w-4/5 pl-4">
-				<h2 class="text-2xl font-bold mb-4">トリップリスト{{ $trip->title }}</h2>
+				<h2 class="text-2xl font-bold mb-4">{{ $trip->title }}</h2>
 
-				<div class="flex mb-4">
-					<button class="bg-blue-500 text-white py-2 px-4 rounded mr-2">この計画リストを公開する</button>
-					<button class="bg-gray-500 text-white py-2 px-4 rounded">実際に行った日付詳細ブレダウン</button>
-				</div>
-
-				<div class="border p-4 mb-4">
+				<div class="items-center border p-4 bg-white rounded-md shadow-sm mb-4">
 					<p>計画リストをピンで一括表示したグーグルマップ</p>
-					<!-- Google マップ表示 -->
-					<div id="map" style="height: 500px; width: 100%;"></div>
+					<div id="map" class="map" style="height: 500px; width: 100%;"></div>
 				</div>
 
 				<form method="POST" action="/store/trip">
 					@csrf
 					<div class="flex justify">
 						<!-- Spot List -->
-						<div class="w-1/5 border-r pr-4">
+						<div class="w-1/2 border-r pr-4">
 							<h3 class="text-lg font-bold mb-2">行きたいスポット</h3>
 							<div>
 								<label class="block text-xl font-bold text-gray-700">まだ行ってない場所</label>
@@ -75,7 +62,7 @@
 						</div>
 	
 						<!-- Main Details -->
-						<div class="w-1/5 pl-4">
+						<div class="w-1/2 pl-4">
 							<h3 class="text-lg font-bold mb-2">計画リストのアピールポイント</h3>
 						
 							<!--<div class="flex justify-between h-16">-->
@@ -101,14 +88,11 @@
 								<span class="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-500 to-blue-600"></span>
 								<span class="relative">投稿</span>
 							</button>
-							<div class="mt-4 border-t pt-2">
-								<h4 class="text-md font-bold">読者からのコメント及び5つ星評価</h4>
-								<!-- コメントと評価をここに表示 -->
-							</div>
+							
 						</div>
 					</div>
 				</form>
-				
+			</div>	
 		</div>
 	</div>
 

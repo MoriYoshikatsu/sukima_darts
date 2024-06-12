@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Trip;
+use App\Models\User;
 use App\Models\SpotTrip;
 use App\Models\Parameter;
 use App\Models\SpotCategory;
@@ -36,12 +37,30 @@ class TripController extends Controller
 		}
 		return view('trip.index')->with(['trips' => $filteredTrips, "tripWentSpotTrips" => $tripWentSpotTrips, "tripSpotTrips" => $tripSpotTrips]);
 	}
-
-	/**
-	 * Show the form for creating a new resource.
-	 *
-	 * @return \Illuminate\Http\Response
-	 */
+	
+	public function others_index(Request $request)
+	{
+		$trips = Trip::all();
+		$user_id = $request->route('user');
+		$user = User::where('id', $user_id)->first();
+		$userParameters = Parameter::where('user_id', $user_id)->get();
+		$filteredTrips = collect();
+		$tripSpotTrips = [];
+		$tripWentSpotTrips = [];
+		
+		foreach ($trips as $trip) {
+			foreach ($userParameters as $parameter) {
+				if ($trip->parameter_id === $parameter->id) {
+					$filteredTrips->push($trip);
+					
+					$tripSpotTrips[$trip->id] = SpotTrip::where('trip_id', $trip->id)->where('status', 0)->get();
+					$tripWentSpotTrips[$trip->id] = SpotTrip::where('trip_id', $trip->id)->where('status', 1)->get();
+				}
+			}
+		}
+		return view('trip.othersindex')->with(['trips' => $filteredTrips, "tripWentSpotTrips" => $tripWentSpotTrips, "tripSpotTrips" => $tripSpotTrips, "user" => $user]);
+	}
+	
 	public function create(Request $request)
 	{
 		$trips = Trip::all();
@@ -134,7 +153,7 @@ class TripController extends Controller
 		// dd($trip);
 		$SpotTrips = SpotTrip::where('trip_id', $trip->id)->get();
 		// $wentSpotTrips = SpotTrip::where('trip_id', $trip->id)->where('status', 1)->get();
-	
+		
 		return view('trip.edit')->with(['trips' => $filteredTrips, "trip" => $trip, "SpotTrips" => $SpotTrips]);
 	}
 
