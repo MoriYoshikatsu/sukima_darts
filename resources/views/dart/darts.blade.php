@@ -1,25 +1,24 @@
 <x-app-layout>
-	<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('app.google_key') }}&libraries=streetView&callback=initMap&v=weekly"></script>
 	<x-slot name="title">ダーツの結果</x-slot>
 
-	<div id="map" style="height: 600px; width:1200px; float: left;"></div>
+	<div class="container mx-auto p-4 space-y-4">
+		<div class="items-center border p-4 bg-white rounded-md shadow-sm mb-4">
+			<div id="map" class="map" style="height: 500px; width: 100%;"></div>
+		</div>
 
-	<div id="place-result" style="float: right; width: 300px;">
-		<form id="spotsForm" action="/users/{{ Auth::id() }}/trip/list" method="POST">
-			@csrf
-			<div id="spot-list">
-			</div>
-			
-			<input type="hidden" name="parameter_id" value={{ $parameter->id }}>
-			<input type="hidden" name="dart_latitude" id="dart_latitude">
-			<input type="hidden" name="dart_longitude" id="dart_longitude">
-			
-			<button type="submit">送信</button>
-		</form>
-	</div>
-
-	<div style="clear: both;">
-		{{ $parameter->spot_category->ja_name }}
+		<!-- Place Result Section -->
+		<div id="place-result" class="w-full bg-white p-4 rounded shadow">
+			<form id="spotsForm" action="/users/{{ Auth::id() }}/trip/list" method="POST">
+				@csrf
+				<div id="spot-list" class="mb-4 space-y-2"></div>
+	
+				<input type="hidden" name="parameter_id" value="{{ $parameter->id }}">
+				<input type="hidden" name="dart_latitude" id="dart_latitude">
+				<input type="hidden" name="dart_longitude" id="dart_longitude">
+	
+				<button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-300">送信</button>
+			</form>
+		</div>
 	</div>
 
 	<!-- Google Maps JavaScript -->
@@ -28,12 +27,12 @@
 		let infoWindow;
 		const departureLocation = { lat: {{ $parameter->departure_latitude }}, lng: {{ $parameter->departure_longitude }} };
 		const r = getRadius();
-		let dartLocation = {}; // dartLocation をグローバルスコープで宣言
+		let dartLocation = {};
 		const redPin = "https://maps.google.com/mapfiles/ms/micons/red-pushpin.png";
 		const orangePin = "http://maps.google.com/mapfiles/ms/icons/orange-dot.png";
 		const bluePin = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png";
 		const greenPin = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
-		
+
 		function placeMarker(pos, iconUrl) {
 			return new google.maps.Marker({
 				position: pos,
@@ -43,7 +42,7 @@
 				}
 			});
 		}
-		
+
 		function getRadius(departureLocation) {
 			const transportation = "{{ $parameter->transportation }}";
 			const tripTime = {{ $parameter->trip_time }};
@@ -57,7 +56,7 @@
 			}
 			return radius;
 		}
-		
+
 		function drawCircle(pos, r) {
 			const cityCircle = new google.maps.Circle({
 				strokeColor: "#ED1A3D",
@@ -70,76 +69,59 @@
 				radius: r,
 			});
 		}
-		
-// 			function processSVData({ data }) {		// processSVData 関数を initMap 関数の外に移動する
-// 				const location = data.location;		// map 変数を参照するため、map を関数の外で定義するか、引数として渡す必要があります
-// 				placeMarker(location.latLng, redPin);
-// 				map.setCenter(location.latLng);
-// 				dartLocation.lat = data.location.lat();		// データが取得された後に dartLocation の値をセットする
-// 				dartLocation.lng = data.location.lng();		// dartLocation の値を更新
-			
-// 				// Hidden Inputs の値を設定
-// 				document.getElementById('dart_latitude').value = dartLocation.lat;
-// 				document.getElementById('dart_longitude').value = dartLocation.lng;
-// 			}
-// 			console.log(location);
-		
+
 		function initMap() {
 			map = new google.maps.Map(document.getElementById("map"), {
 				center: departureLocation,
 				zoom: 14,
 			});
-			
+
 			infoWindow = new google.maps.InfoWindow();
-			
+
 			placeMarker(departureLocation, greenPin);
-			
+
 			drawCircle(departureLocation, r);
-			
-			// ストリートビューのあるところにランダムにピンを指す機能
+
 			const sv = new google.maps.StreetViewService();
-				var outerRadius = r;
-				var innerRadius = outerRadius - outerRadius / 10;
-				var angle = Math.random() * Math.PI * 2;
-				var distance = Math.sqrt(Math.random()) * (outerRadius - innerRadius) + innerRadius;
-				var dartLat = departureLocation.lat + (distance / 111111) * Math.cos(angle);
-				var dartLng = departureLocation.lng + (distance / (111111 * Math.cos(departureLocation.lat * Math.PI / 180))) * Math.sin(angle);
-				var dartLocation = { lat: dartLat, lng: dartLng };
-				console.log(dartLocation);
-				
+			var outerRadius = r;
+			var innerRadius = outerRadius - outerRadius / 10;
+			var angle = Math.random() * Math.PI * 2;
+			var distance = Math.sqrt(Math.random()) * (outerRadius - innerRadius) + innerRadius;
+			var dartLat = departureLocation.lat + (distance / 111111) * Math.cos(angle);
+			var dartLng = departureLocation.lng + (distance / (111111 * Math.cos(departureLocation.lat * Math.PI / 180))) * Math.sin(angle);
+			var dartLocation = { lat: dartLat, lng: dartLng };
+			console.log(dartLocation);
+
 			placeMarker(dartLocation, redPin);
 			map.setCenter(dartLocation);
-			//   Street View のデータを取得
-			// sv.getPanorama({ location: dartLocation, radius: r*0.3 })
-			// 	.then(processSVData)
-			// 	.catch((e) => console.error("Street View data not found for this location."));
-			
+
 			document.getElementById('dart_latitude').value = dartLocation.lat;
 			document.getElementById('dart_longitude').value = dartLocation.lng;
-		
-		const request = {
+
+			const request = {
 				location: dartLocation,
-				radius: r*0.5,
+				radius: r * 0.5,
 				type: ['{{ $parameter->spot_category->en_name }}'],
-			}
-			
+			};
+
 			const service = new google.maps.places.PlacesService(map);
 			service.nearbySearch(request, callback);
 		}
-		
+
 		function callback(results, status) {
 			if (status == google.maps.places.PlacesServiceStatus.OK) {
 				const spotListDiv = document.getElementById('spot-list');
 				spotListDiv.innerHTML = '';
-				
+
 				for (var i = 0; i < results.length; i++) {
 					const spot = results[i];
 					placeMarkerWithInfo(spot.geometry.location.lat(), spot.geometry.location.lng(), bluePin, spot);
-					
+
 					const spotElement = document.createElement('div');
+					spotElement.className = 'bg-gray-100 p-2 rounded shadow mb-2';
 					spotElement.innerHTML = `
-						<label>
-							<input type="checkbox" name="spot[${i}][selected]" value="1">
+						<label class="flex items-center">
+							<input type="checkbox" name="spot[${i}][selected]" value="1" class="mr-2">
 							${spot.name}
 						</label>
 						<input type="hidden" name="spot[${i}][spot_category_id]" value="{{ $parameter->spot_category->id }}">
@@ -153,11 +135,11 @@
 				document.getElementById('place-result').innerHTML = "該当する施設が見つかりませんでした。";
 			}
 		}
-		
+
 		function placeMarkerWithInfo(lat, lng, iconUrl, place) {
 			const marker = placeMarker({ lat: lat, lng: lng }, iconUrl);
-			
-			google.maps.event.addListener(marker, 'click', function() {
+
+			google.maps.event.addListener(marker, 'click', function () {
 				const content = `
 					<div>
 						<p>クリックするとググれます！</p>
