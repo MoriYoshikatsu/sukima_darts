@@ -46,16 +46,17 @@
 					</div>
 					<input type="hidden" name="parameter[departure_latitude]" id="departure_latitude">
 					<input type="hidden" name="parameter[departure_longitude]" id="departure_longitude">
-					<input id="address" type="text" name="post[address]" placeholder="出発地" value="" class="mt-2 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"/>
+					<input id="address" type="text" name="post[address]" placeholder="出発地名を入力" value="" class="mt-2 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"/>
 					<p class="text-red-500 text-sm mt-1">{{ $errors->first('address') }}</p>
+					<button onclick="searchPlaces()">検索</button>
 				</div>
 	
 				<div class="flex justify-end">
-	                <button type="submit" class="relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-medium text-white transition duration-300 ease-out bg-blue-600 rounded-md shadow-lg group hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-	                    <span class="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-500 to-blue-600"></span>
-	                    <span class="relative">この条件でダーツを投げる</span>
-	                </button>
-	            </div>
+					<button type="submit" class="relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-medium text-white transition duration-300 ease-out bg-blue-600 rounded-md shadow-lg group hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+						<span class="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-500 to-blue-600"></span>
+						<span class="relative">この条件でダーツを投げる</span>
+					</button>
+				</div>
 			</div>
 		</form>
 	</div>
@@ -64,12 +65,14 @@
 	<script>
 		let map;
 		let marker;
-		
+		let service;
+		let infowindow;
 		function initMap(position) {	// Google Maps API を使用して地図を初期化する関数
 			map = new google.maps.Map(document.getElementById('map'), {		// 地図を表示する要素を取得・新しい地図インスタントの作成
 				center: {lat: 35.6585769, lng: 139.7454506},	// 東京駅を中心に表示
 				zoom: 15
 			});
+			infowindow = new google.maps.InfoWindow();
 			
 			if (navigator.geolocation) {	// 現在位置を取得して地図の中心に設定する
 				navigator.geolocation.getCurrentPosition(function(position) {
@@ -98,15 +101,37 @@
 			});
 		}
 		
+		function searchPlaces() {
+			event.preventDefault(); // フォームのデフォルトの送信動作を防ぐ
+			const searchInput = document.getElementById('address').value;
+			const request = {
+				query: searchInput,
+				fields: ['name', 'geometry'],
+				locationBias: map.getCenter()
+			};
+		
+			service = new google.maps.places.PlacesService(map);
+			service.findPlaceFromQuery(request, function(results, status) {
+				if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+					for (let i = 0; i < results.length; i++) {
+						createMarker(results[i]);
+					}
+					map.setCenter(results[0].geometry.location);
+				}
+			});
+		}
+
 		function createMarker(location) {
-			if (marker) {
-				marker.setPosition(location);
-			} else {
-				marker = new google.maps.Marker({
-					position: location,
-					map: map
-				});
-			}
+			const marker = new google.maps.Marker({
+				map: map,
+				position: place.geometry.location
+			});
+			
+			google.maps.event.addListener(marker, 'click', function() {
+				infowindow.setContent(place.name);
+				infowindow.open(map, this);
+			});
+		
 		}
 		
 		function displayAddress(latlng) {	//Geocoderオブジェクトを作成
