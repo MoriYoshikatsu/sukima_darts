@@ -112,27 +112,39 @@
 		
 			service = new google.maps.places.PlacesService(map);
 			service.findPlaceFromQuery(request, function(results, status) {
-				if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-					for (let i = 0; i < results.length; i++) {
-						createMarker(results[i]);
+				if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
+					const place = results[0];
+					if (place.geometry && place.geometry.location) {
+						createMarker(place.geometry.location);
+						map.setCenter(place.geometry.location);
+						displayAddress(place.geometry.location);
+						document.getElementById('departure_latitude').value = place.geometry.location.lat();
+						document.getElementById('departure_longitude').value = place.geometry.location.lng();
+					} else {
+						console.error('Place geometry is missing');
 					}
-					map.setCenter(results[0].geometry.location);
+				} else {
+					console.error('No results found or status not OK');
 				}
 			});
 		}
 
 		function createMarker(location) {
-			const marker = new google.maps.Marker({
-				map: map,
-				position: place.geometry.location
-			});
-			
+			if (marker) {
+				marker.setPosition(location);
+			} else {
+				marker = new google.maps.Marker({
+					map: map,
+					position: location
+				});
+			}
+		
 			google.maps.event.addListener(marker, 'click', function() {
-				infowindow.setContent(place.name);
+				infowindow.setContent('位置: ' + location.lat() + ', ' + location.lng());
 				infowindow.open(map, this);
 			});
-		
 		}
+
 		
 		function displayAddress(latlng) {	//Geocoderオブジェクトを作成
 			var geocoder = new google.maps.Geocoder();	//Geocoderオブジェクトを作成
@@ -149,8 +161,12 @@
 			});
 		}
 		
-		function handleLocationError(browserHasGeolocation, infoWindow, pos) {
-			console.error('位置情報の取得に失敗しました。');
+		function handleLocationError(browserHasGeolocation, infowindow, pos) {
+			infowindow.setPosition(pos);
+			infowindow.setContent(browserHasGeolocation ?
+				'Error: The Geolocation service failed.' :
+				'Error: Your browser doesn\'t support geolocation.');
+			infowindow.open(map);
 		}
 		
 	</script>
