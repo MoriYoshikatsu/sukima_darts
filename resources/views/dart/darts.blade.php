@@ -90,10 +90,7 @@
 			var dartLat = departureLocation.lat + (distance / 111111) * Math.cos(angle);
 			var dartLng = departureLocation.lng + (distance / (111111 * Math.cos(departureLocation.lat * Math.PI / 180))) * Math.sin(angle);
 			var dartLocation = { lat: dartLat, lng: dartLng };
-			console.log(dartLocation);
-
-			placeMarker(dartLocation, redPin);
-			map.setCenter(dartLocation);
+					map.setCenter(dartLocation);
 
 			document.getElementById('dart_latitude').value = dartLocation.lat;
 			document.getElementById('dart_longitude').value = dartLocation.lng;
