@@ -20,7 +20,7 @@ class ParameterController extends Controller
 	}
 	
 	public function post_parameter(Request $request)
-	{   
+	{
 		$input = $request['parameter'];
 		$parameter = new Parameter();
 		$parameter->fill($input)->save();
